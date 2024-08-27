@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      table,
+      tr,
+      td,
+      th {
+        border: 1px solid black;
+        border-collapse: collapse;
+      }
+
+      td,
+      th {
+        padding: 10px;
+      }
+      td {
+        font-size: 1em;
+        font-weight: bold;
+      }
+
+      th {
+        background-color: rgb(98, 98, 172);
+        font-size: 2em;
+      }
+      #btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: aliceblue;
+        color: aliceblue;
+        height: 25px;
+        width: 25px;
+        border-radius: 4px;
+      }
+
+      #btn:hover {
+        background-color: aliceblue;
+        color: black;
+        cursor: pointer;
+      }
+
+      #box1 {
+        border: 1px solid black;
+        margin-top: 20px;
+        padding: 10px;
+        width: 300px;
+        font-size: large;
+        font-weight: bold;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        background-color: #f0f0f0;
+        border-radius: 8px;
+      }
+      #box1 div {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        margin: 1px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      let itemObject = {
+        type: "",
+        name: "",
+        ilvl: "",
+      };
+      let editObject = {
+        id: "",
+        type: "",
+        name: "",
+        ilvl: "",
+      };
+      let editMode = false;
+
+      updateView();
+      async function updateView() {
+        const response = await fetch("http://localhost:3000/api/items");
+        const data = await response.json();
+
+        let html = `<tr>
+                      <th>Id</th>
+                      <th>Type</th>
+                      <th>Name</th>
+                      <th>Ilvl</th>
+                      <th></th>
+                      <th></th>
+                    </tr>`;
+
+        for (let i = 0; i < data.length; i++) {
+          html += createHtml(data[i], i);
+        }
+
+        document.getElementById("app").innerHTML = /*HTML*/ `
+        <table>${html}</table>
+        <div id = "box1">
+          ${createInputBox()}
+        </div>
+        `;
+      }
+
+      function createHtml(item, index) {
+        if (!editMode || editObject.id != item.Id) {
+          return /*HTML*/ `
+        <tr>
+          <td>${item.Id}</td>
+          <td>${item.Type}</td>
+          <td>${item.Name}</td>
+          <td>${item.ItemLevel}</td>
+          <td><div><button onclick="enterEditMode(${item.Id}, '${item.Type}', '${item.Name}', ${item.ItemLevel})">Edit</button></div></td>
+          <td><div id="btn" onclick="remove(${item.Id})">X</div></td>
+        </tr>
+        `;
+        }
+        return /*HTML*/ `
+        <tr>
+          <td>${item.Id}</td>
+          <td><input type="text" value ="${editObject.type}" onchange="editObject.type = this.value"></td>
+          <td><input type="text" value ="${editObject.name}" onchange="editObject.name = this.value"></td>
+          <td><input type="number" value ="${editObject.ilvl}" 
+            onchange="editObject.ilvl = this.value != '' ? parseInt(this.value) : ''"
+            min = 0></td>
+          <td><button onclick="updateItem(${item.Id})">Save</button></td>
+          <td><div id="btn" onclick="remove(${item.Id})">X</div></td>
+        </tr>
+        `;
+      }
+      function createInputBox() {
+        return /*HTML*/ `
+        <div>Type: <input
+            type = "text"
+            value ="${itemObject.type}"
+            oninput="itemObject.type = this.value">
+          </div>
+          <div>Name: <input
+            type = "text"
+            value ="${itemObject.name}"
+            oninput="itemObject.name = this.value">
+          </div>
+          <div>Item Level: <input
+            type="number"
+            value ="${itemObject.ilvl}"
+            oninput="itemObject.ilvl = this.value != '' ? parseInt(this.value) : ''"
+            min = 0>
+          </div>
+          <div>
+            <button onclick="addItem()">Add Item</button>
+          </div>
+        `;
+      }
+
+      function enterEditMode(id, type, name, ilvl) {
+        editMode = true;
+        editObject.id = id;
+        editObject.type = type;
+        editObject.name = name;
+        editObject.ilvl = ilvl;
+        updateView();
+      }
+
+      async function remove(id) {
+        const response = await fetch(`http://localhost:3000/api/items/${id}`, {
+          method: "DELETE",
+        });
+
+        if (response.ok) {
+          updateView();
+        }
+      }
+
+      async function addItem() {
+        if (!itemObject.type || !itemObject.name || itemObject.ilvl == "") {
+          return;
+        }
+        const response = await fetch("http://localhost:3000/api/items", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            Type: itemObject.type,
+            Name: itemObject.name,
+            ItemLevel: itemObject.ilvl,
+          }),
+        });
+
+        if (response.ok) {
+          itemObject = { type: "", name: "", ilvl: "" };
+          updateView();
+        }
+      }
+
+      async function updateItem(id) {
+        const response = await fetch(`http://localhost:3000/api/items/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            Type: editObject.type,
+            Name: editObject.name,
+            ItemLevel: editObject.ilvl,
+          }),
+        });
+
+        if (response.ok) {
+          updateView();
+          editMode = false;
+        }
+      }
+    </script>
+  </body>
+</html>

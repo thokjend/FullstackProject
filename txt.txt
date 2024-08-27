@@ -1,0 +1,6 @@
+1. setup database
+2. lage api med node.js
+3. sendte til frontend, vise json data på siden
+4. oppgrader api. CRUD
+5. wow api
+6. react
