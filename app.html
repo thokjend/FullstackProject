@@ -4,68 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <style>
-      table,
-      tr,
-      td,
-      th {
-        border: 1px solid black;
-        border-collapse: collapse;
-      }
-
-      td,
-      th {
-        padding: 10px;
-      }
-      td {
-        font-size: 1em;
-        font-weight: bold;
-      }
-
-      th {
-        background-color: rgb(98, 98, 172);
-        font-size: 2em;
-      }
-      #btn {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: aliceblue;
-        color: aliceblue;
-        height: 25px;
-        width: 25px;
-        border-radius: 4px;
-      }
-
-      #btn:hover {
-        background-color: aliceblue;
-        color: black;
-        cursor: pointer;
-      }
-
-      #box1 {
-        border: 1px solid black;
-        margin-top: 20px;
-        padding: 10px;
-        width: 300px;
-        font-size: large;
-        font-weight: bold;
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        background-color: #f0f0f0;
-        border-radius: 8px;
-      }
-      #box1 div {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-        margin: 1px;
-      }
-    </style>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div id="app"></div>
+    <div id="root"></div>
     <script>
       let itemObject = {
         type: "",
@@ -95,10 +37,10 @@
                     </tr>`;
 
         for (let i = 0; i < data.length; i++) {
-          html += createHtml(data[i], i);
+          html += createHtml(data[i]);
         }
 
-        document.getElementById("app").innerHTML = /*HTML*/ `
+        document.getElementById("root").innerHTML = /*HTML*/ `
         <table>${html}</table>
         <div id = "box1">
           ${createInputBox()}
@@ -106,7 +48,7 @@
         `;
       }
 
-      function createHtml(item, index) {
+      function createHtml(item) {
         if (!editMode || editObject.id != item.Id) {
           return /*HTML*/ `
         <tr>
